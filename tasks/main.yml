@@ -56,4 +56,3 @@
   systemd: name="{{ _haproxy.instance_name }}" enabled=yes
 
 - meta: flush_handlers
-
