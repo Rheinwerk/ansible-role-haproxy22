@@ -1,0 +1,59 @@
+---
+# Haproxy Installation Role
+# vim:ft=ansible:ts=2:et:
+
+- debug: msg="haproxy instance {{ _haproxy.instance_name }}"
+
+- name: Add haproxy-ppa-2.2 repository
+  apt_repository: repo="ppa:vbernat/haproxy-2.2" update_cache=yes
+
+- name: Install HAProxy
+  apt:
+    state: present
+    force: true
+    pkg:
+      - "haproxy={{ _haproxy.version }}"
+      - "socat"
+  notify:
+    - "Reload haproxy {{ _haproxy.instance_name }}"
+    - "Restart rsyslog"
+
+- name: Create haproxy configuration directory
+  file: path="/etc/{{ _haproxy.instance_name }}" state=directory owner=haproxy group=haproxy mode=0755
+
+- block:
+    - name: Create SSL certificate directory
+      file: path="/etc/{{ _haproxy.instance_name }}/ssl" state=directory owner=haproxy group=haproxy mode=0755
+
+    - name: Install SSL certificates and keys
+      copy:
+        content: "{{ item.value.data | b64decode }}"
+        dest: "/etc/{{ _haproxy.instance_name }}/ssl/{{ item.value.filename }}"
+        owner: haproxy
+        group: haproxy
+        mode: "0640"
+      with_dict: "{{ _haproxy.ssl_certs|default({}) }}"
+      notify:
+        - "Reload haproxy {{ _haproxy.instance_name }}"
+
+    - name: Inform external collector about our certificate location
+      lineinfile: dest=/etc/cert_exp_time_globs owner=root group=root mode=0644 create=yes line="/etc/{{ _haproxy.instance_name }}/ssl/*"
+
+  when: _haproxy.ssl_certs is defined
+
+- name: Create HAProxy configuration file
+  template:
+    src: "etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name }}.cfg.j2"
+    dest: "/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name}}.cfg"
+    owner: haproxy
+    group: haproxy
+    mode: "0640"
+  notify:
+    - "Reload haproxy {{ _haproxy.instance_name }}"
+  when: _haproxy.use_default_config|default(no)
+
+- name: Enable HAProxy for autostart
+  systemd: name="{{ _haproxy.instance_name }}" enabled=yes
+
+- meta: flush_handlers
+

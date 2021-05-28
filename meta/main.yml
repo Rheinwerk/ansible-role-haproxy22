@@ -1,0 +1,16 @@
+---
+allow_duplicates: yes
+galaxy_info:
+  author: Alexander Berresch
+  description: Sets up haproxy 2.2
+  company: Rheinwerk
+  license: license (GPLv3)
+  min_ansible_version: 2.6
+  platforms:
+  - name: Ubuntu
+    versions:
+    - focal
+  galaxy_tags:
+    - haproxy
+    - haproxy22
+dependencies: []
