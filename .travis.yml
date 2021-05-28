@@ -8,7 +8,7 @@ env:
   - ANSIBLE_PIP='ansible'
   - ANSIBLE_PIP='ansible==2.8.*'
   - ANSIBLE_PIP='ansible==2.9.*'
-dist: bionic
+dist: focal
 
 addons:
   apt:
