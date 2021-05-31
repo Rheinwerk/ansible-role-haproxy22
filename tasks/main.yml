@@ -64,7 +64,7 @@
 - name: Create HAProxy systemd unit
   template:
     src: "usr/lib/systemd/system/haproxy.service.j2"
-    dest: "usr/lib/systemd/system/{{ _haproxy.instance_name }}.service"
+    dest: "/usr/lib/systemd/system/{{ _haproxy.instance_name }}.service"
     owner: root
     group: root
     mode: "0644"
