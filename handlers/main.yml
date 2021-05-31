@@ -2,7 +2,7 @@
 # handlers file for ansible-role-haproxy22
 
 - name: Start procps
-  systemd: name=procps state=started
+  systemd: name=procps state=started daemon_reload=true
 
 # ANSIBLE 2 ISSUE: Need to specify the handlers fully, because
 # otherwise whatever variable is used always has the first
@@ -10,7 +10,7 @@
 # uses.
 
 - name: Reload haproxy demo-haproxy
-  systemd: name="demo-haproxy" state=reloaded
+  systemd: name="demo-haproxy" state=reloaded daemon_reload=true
 
 - name: Restart rsyslog
-  systemd: name="rsyslog" state=restarted
+  systemd: name="rsyslog" state=restarted daemon_reload=true
