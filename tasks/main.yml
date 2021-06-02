@@ -59,7 +59,6 @@
     owner: root
     group: root
     mode: "0644"
-  when: _haproxy.use_default_config|default(no)
 
 - name: Create HAProxy systemd unit
   template:
@@ -68,9 +67,6 @@
     owner: root
     group: root
     mode: "0644"
-  notify:
-    - "Reload haproxy {{ _haproxy.instance_name }}"
-  when: _haproxy.use_default_config|default(no)
 
 - name: Enable HAProxy for autostart
   systemd: name="{{ _haproxy.instance_name }}" enabled=yes
