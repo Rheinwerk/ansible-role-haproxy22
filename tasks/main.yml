@@ -4,6 +4,15 @@
 
 - debug: msg="haproxy instance {{ _haproxy.instance_name }}"
 
+- name: Configure kernel parameters
+  copy: src="etc/sysctl.d/{{ item }}" dest="/etc/sysctl.d/{{ item }}" mode=0644 owner=root group=root
+  with_items:
+    - 10-network-buffers.conf
+    - 30-haproxy.conf
+  notify:
+    - Start procps
+    - "Reload haproxy {{ _haproxy.instance_name }}"
+
 - name: Add haproxy-ppa-2.2 repository
   apt_repository: repo="ppa:vbernat/haproxy-2.2" update_cache=yes
 
