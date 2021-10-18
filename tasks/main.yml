@@ -78,6 +78,6 @@
     mode: "0644"
 
 - name: Enable HAProxy for autostart
-  systemd: name="{{ _haproxy.instance_name }}" enabled=yes
+  systemd: name="{{ _haproxy.instance_name }}" enabled=yes daemon_reload=yes
 
 - meta: flush_handlers
