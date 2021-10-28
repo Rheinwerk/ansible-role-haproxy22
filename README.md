@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/Rheinwerk/ansible-role-haproxy22.svg?branch=master)](https://travis-ci.com/Rheinwerk/ansible-role-haproxy22)
+[![Build Status](https://github.com/Rheinwerk/ansible-role-haproxy22/actions/workflows/ci.yml/badge.svg)](https://github.com/Rheinwerk/ansible-role-haproxy22/actions/workflows/ci.yml)
 
 Role Name
 =========
