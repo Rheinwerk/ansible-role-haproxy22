@@ -2,10 +2,17 @@
 # Haproxy Installation Role
 # vim:ft=ansible:ts=2:et:
 
-- debug: msg="haproxy instance {{ _haproxy.instance_name }}"
+- name: Print HAProxy instance name
+  debug:
+    msg: "haproxy instance {{ _haproxy.instance_name }}"
 
 - name: Configure kernel parameters
-  copy: src="etc/sysctl.d/{{ item }}" dest="/etc/sysctl.d/{{ item }}" mode=0644 owner=root group=root
+  copy:
+    src: "etc/sysctl.d/{{ item }}"
+    dest: "/etc/sysctl.d/{{ item }}"
+    mode: 0644
+    owner: root
+    group: root
   with_items:
     - 10-network-buffers.conf
     - 30-haproxy.conf
@@ -14,7 +21,9 @@
     - "Reload haproxy {{ _haproxy.instance_name }}"
 
 - name: Add haproxy-ppa-2.2 repository
-  apt_repository: repo="ppa:vbernat/haproxy-2.2" update_cache=yes
+  apt_repository:
+    repo: "ppa:vbernat/haproxy-2.2"
+    update_cache: yes
 
 - name: Install HAProxy
   apt:
@@ -28,11 +37,22 @@
     - "Restart rsyslog"
 
 - name: Create haproxy configuration directory
-  file: path="/etc/{{ _haproxy.instance_name }}" state=directory owner=haproxy group=haproxy mode=0755
+  file:
+    path: "/etc/{{ _haproxy.instance_name }}"
+    state: directory
+    owner: haproxy
+    group: haproxy
+    mode: 0755
 
-- block:
+- name: SSL Certs
+  block:
     - name: Create SSL certificate directory
-      file: path="/etc/{{ _haproxy.instance_name }}/ssl" state=directory owner=haproxy group=haproxy mode=0755
+      file:
+        path: "/etc/{{ _haproxy.instance_name }}/ssl"
+        state: directory
+        owner: haproxy
+        group: haproxy
+        mode: 0755
 
     - name: Install SSL certificates and keys
       copy:
@@ -41,12 +61,18 @@
         owner: haproxy
         group: haproxy
         mode: "0640"
-      with_dict: "{{ _haproxy.ssl_certs|default({}) }}"
+      with_dict: "{{ _haproxy.ssl_certs | default({}) }}"
       notify:
         - "Reload haproxy {{ _haproxy.instance_name }}"
 
     - name: Inform external collector about our certificate location
-      lineinfile: dest=/etc/cert_exp_time_globs owner=root group=root mode=0644 create=yes line="/etc/{{ _haproxy.instance_name }}/ssl/*"
+      lineinfile:
+        dest: /etc/cert_exp_time_globs
+        owner: root
+        group: root
+        mode: 0644
+        create: yes
+        line: "/etc/{{ _haproxy.instance_name }}/ssl/*"
 
   when: _haproxy.ssl_certs is defined
 
@@ -80,6 +106,10 @@
     mode: "0644"
 
 - name: Enable HAProxy for autostart
-  systemd: name="{{ _haproxy.instance_name }}" enabled=yes daemon_reload=yes
+  systemd:
+    name: "{{ _haproxy.instance_name }}"
+    enabled: yes
+    daemon_reload: yes
 
-- meta: flush_handlers
+- name: Flush handlers
+  meta: flush_handlers
