@@ -45,6 +45,7 @@
     mode: 0755
 
 - name: SSL Certs
+  when: _haproxy.ssl_certs is defined
   block:
     - name: Create SSL certificate directory
       file:
@@ -73,8 +74,6 @@
         mode: 0644
         create: yes
         line: "/etc/{{ _haproxy.instance_name }}/ssl/*"
-
-  when: _haproxy.ssl_certs is defined
 
 - name: Create HAProxy configuration file
   template:
