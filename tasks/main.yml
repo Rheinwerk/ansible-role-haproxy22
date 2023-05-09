@@ -3,11 +3,11 @@
 # vim:ft=ansible:ts=2:et:
 
 - name: Print HAProxy instance name
-  debug:
+  ansible.builtin.debug:
     msg: "haproxy instance {{ _haproxy.instance_name }}"
 
 - name: Configure kernel parameters
-  copy:
+  ansible.builtin.copy:
     src: "etc/sysctl.d/{{ item }}"
     dest: "/etc/sysctl.d/{{ item }}"
     mode: 0644
@@ -21,12 +21,12 @@
     - "Reload haproxy {{ _haproxy.instance_name }}"
 
 - name: Add haproxy-ppa-2.2 repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "ppa:vbernat/haproxy-2.2"
     update_cache: yes
 
 - name: Install HAProxy
-  apt:
+  ansible.builtin.apt:
     state: present
     force: true
     pkg:
@@ -37,7 +37,7 @@
     - "Restart rsyslog"
 
 - name: Create haproxy configuration directory
-  file:
+  ansible.builtin.file:
     path: "/etc/{{ _haproxy.instance_name }}"
     state: directory
     owner: haproxy
@@ -48,7 +48,7 @@
   when: _haproxy.ssl_certs is defined
   block:
     - name: Create SSL certificate directory
-      file:
+      ansible.builtin.file:
         path: "/etc/{{ _haproxy.instance_name }}/ssl"
         state: directory
         owner: haproxy
@@ -56,7 +56,7 @@
         mode: 0755
 
     - name: Install SSL certificates and keys
-      copy:
+      ansible.builtin.copy:
         content: "{{ item.value.data | b64decode }}"
         dest: "/etc/{{ _haproxy.instance_name }}/ssl/{{ item.value.filename }}"
         owner: haproxy
@@ -67,7 +67,7 @@
         - "Reload haproxy {{ _haproxy.instance_name }}"
 
     - name: Inform external collector about our certificate location
-      lineinfile:
+      ansible.builtin.lineinfile:
         dest: /etc/cert_exp_time_globs
         owner: root
         group: root
@@ -76,7 +76,7 @@
         line: "/etc/{{ _haproxy.instance_name }}/ssl/*"
 
 - name: Create HAProxy configuration file
-  template:
+  ansible.builtin.template:
     src: "etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name }}.cfg.j2"
     dest: "/etc/{{ _haproxy.instance_name }}/{{ _haproxy.instance_name }}.cfg"
     owner: haproxy
@@ -87,7 +87,7 @@
   when: _haproxy.use_default_config|default(no)
 
 - name: Create HAProxy systemd helper script
-  file:
+  ansible.builtin.file:
     path: "/var/lib/systemd/deb-systemd-helper-enabled/multi-user.target.wants/{{ _haproxy.instance_name }}.service"
     state: "touch"
     owner: root
@@ -97,7 +97,7 @@
     modification_time: preserve
 
 - name: Create HAProxy systemd unit
-  template:
+  ansible.builtin.template:
     src: "usr/lib/systemd/system/haproxy.service.j2"
     dest: "/usr/lib/systemd/system/{{ _haproxy.instance_name }}.service"
     owner: root
@@ -105,10 +105,10 @@
     mode: "0644"
 
 - name: Enable HAProxy for autostart
-  systemd:
+  ansible.builtin.systemd:
     name: "{{ _haproxy.instance_name }}"
     enabled: yes
     daemon_reload: yes
 
 - name: Flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
